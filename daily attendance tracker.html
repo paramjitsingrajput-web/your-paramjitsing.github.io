@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Attendance Tracker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6fb;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background: #1976d2;
+            color: white;
+            padding: 15px 25px;
+            text-align: center;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 26px;
+        }
+
+        header p {
+            margin: 4px 0 0;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 20px auto 40px;
+            padding: 0 15px;
+        }
+
+        .top-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .top-bar input[type="date"] {
+            padding: 6px 8px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+
+        .add-student-box {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .add-student-box input {
+            padding: 6px 8px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+
+        .btn {
+            border: none;
+            padding: 7px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .btn-primary {
+            background: #1976d2;
+            color: white;
+        }
+
+        .btn-save {
+            background: #388e3c;
+            color: white;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            background: white;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+        }
+
+        th, td {
+            padding: 10px;
+            border-bottom: 1px solid #e0e0e0;
+            text-align: left;
+            font-size: 14px;
+        }
+
+        th {
+            background: #e3f2fd;
+        }
+
+        select {
+            padding: 4px 6px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+
+        #summary {
+            margin-top: 15px;
+            font-size: 14px;
+            padding: 10px;
+            border-radius: 6px;
+            background: #e8f5e9;
+            border: 1px solid #c8e6c9;
+            display: none;
+        }
+
+        footer {
+            text-align: center;
+            font-size: 12px;
+            color: #777;
+            padding-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Attendance Tracker</h1>
+    <p>Mark daily attendance for your class.</p>
+</header>
+
+<div class="container">
+    <!-- Date + Add student -->
+    <div class="top-bar">
+        <div>
+            <label for="dateInput"><strong>Date:</strong></label>
+            <input type="date" id="dateInput">
+        </div>
+
+        <div class="add-student-box">
+            <input type="text" id="studentNameInput" placeholder="Enter student name">
+            <button class="btn btn-primary" id="addStudentBtn">Add Student</button>
+        </div>
+    </div>
+
+    <!-- Attendance table -->
+    <table id="attendanceTable">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Student Name</th>
+                <th>Status (Present / Absent)</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody">
+            <!-- Rows will be added by JavaScript -->
+        </tbody>
+    </table>
+
+    <button class="btn btn-save" id="saveBtn" style="margin-top: 15px;">Save Today’s Attendance</button>
+
+    <div id="summary"></div>
+</div>
+
+<footer>
+    &copy; 2025 Attendance Tracker. Simple HTML + JavaScript Demo.
+</footer>
+
+<script>
+    // ===== INITIAL SAMPLE STUDENTS =====
+    const students = [
+        "Aarav",
+        "Priya",
+        "Rahul",
+        "Sanjana",
+        "Vikram"
+    ];
+
+    const tableBody = document.getElementById('tableBody');
+    const addStudentBtn = document.getElementById('addStudentBtn');
+    const studentNameInput = document.getElementById('studentNameInput');
+    const saveBtn = document.getElementById('saveBtn');
+    const summaryDiv = document.getElementById('summary');
+    const dateInput = document.getElementById('dateInput');
+
+    // Set today as default date
+    const today = new Date().toISOString().split('T')[0];
+    dateInput.value = today;
+
+    // Function to create a row for a student
+    function addStudentRow(name) {
+        const row = document.createElement('tr');
+
+        // Serial no.
+        const index = tableBody.children.length + 1;
+        const cellIndex = document.createElement('td');
+        cellIndex.textContent = index;
+
+        // Name cell
+        const cellName = document.createElement('td');
+        cellName.textContent = name;
+
+        // Status cell (dropdown)
+        const cellStatus = document.createElement('td');
+        const select = document.createElement('select');
+        const optionPresent = document.createElement('option');
+        optionPresent.value = "Present";
+        optionPresent.textContent = "Present";
+        const optionAbsent = document.createElement('option');
+        optionAbsent.value = "Absent";
+        optionAbsent.textContent = "Absent";
+
+        select.appendChild(optionPresent);
+        select.appendChild(optionAbsent);
+
+        cellStatus.appendChild(select);
+
+        row.appendChild(cellIndex);
+        row.appendChild(cellName);
+        row.appendChild(cellStatus);
+
+        tableBody.appendChild(row);
+    }
+
+    // Add initial sample students
+    students.forEach(name => addStudentRow(name));
+
+    // Add new student from input
+    addStudentBtn.addEventListener('click', () => {
+        const name = studentNameInput.value.trim();
+        if (name === "") {
+            alert("Please enter a student name.");
+            return;
+        }
+        addStudentRow(name);
+        studentNameInput.value = "";
+        studentNameInput.focus();
+    });
+
+    // Save attendance for the day
+    saveBtn.addEventListener('click', () => {
+        const date = dateInput.value || "No date selected";
+
+        let total = 0;
+        let presentCount = 0;
+        let absentCount = 0;
+        const records = [];
+
+        // Loop through table rows
+        Array.from(tableBody.children).forEach(row => {
+            const name = row.children[1].textContent;
+            const status = row.children[2].querySelector('select').value;
+
+            total++;
+            if (status === "Present") presentCount++;
+            else absentCount++;
+
+            records.push({ name, status });
+        });
+
+        // Show summary on screen
+        summaryDiv.style.display = 'block';
+        summaryDiv.innerHTML = `
+            <strong>Date:</strong> ${date}<br>
+            <strong>Total Students:</strong> ${total}<br>
+            <strong>Present:</strong> ${presentCount}, 
+            <strong>Absent:</strong> ${absentCount}
+        `;
+
+        // Optional: Save to browser localStorage
+        const key = "attendance_" + date;
+        localStorage.setItem(key, JSON.stringify(records));
+
+        alert("Attendance saved for " + date + " (also stored in browser localStorage).");
+        console.log("Saved attendance:", date, records);
+    });
+</script>
+
+</body>
+</html>
